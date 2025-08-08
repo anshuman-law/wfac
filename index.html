@@ -1,1070 +1,449 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Writing for a Change 2.0</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0d0d1a; /* Dark background */
-            color: #e0e0e0; /* Light grey text */
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            position: relative;
-        }
-        #background-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1; /* Behind everything */
-            opacity: 0.2; /* Very subtle */
-        }
-        #network-svg-overlay {
-            position: fixed; /* Fixed to viewport */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0; /* Between background and content */
-            pointer-events: none; /* Crucial: allows clicks to pass through to content */
-        }
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-            position: relative;
-            z-index: 1; /* Above SVG overlay */
-        }
-        h1 {
-            font-size: 6.5rem; /* Main heading remains large and dominant */
-            font-weight: 900;
-            text-align: center;
-            margin-bottom: 8rem; /* Generous space below heading */
-            padding-top: 4rem; /* Generous space above heading */
-            color: #f0f0f0;
-            text-shadow: 0 0 30px rgba(255,255,255,0.4);
-            line-height: 0.95;
-            letter-spacing: -0.05em;
-            text-transform: uppercase;
-
-            /* Animation */
-            animation: fadeInSlideDown 1s ease-out forwards;
-        }
-        /* Keyframes for initial fade-in and slide-down */
-        @keyframes fadeInSlideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive adjustments for h1 */
-        @media (max-width: 1024px) {
-            h1 {
-                font-size: 5rem;
-                margin-bottom: 6rem;
-                padding-top: 3rem;
-            }
-        }
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 4rem;
-                margin-bottom: 5rem;
-                padding-top: 2.5rem;
-            }
-        }
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 3rem;
-                margin-bottom: 4rem;
-                padding-top: 2rem;
-            }
-            .container {
-                padding: 2rem 1rem; /* Adjust container padding for small screens */
-            }
-        }
-
-        .overarching-themes {
-            margin-top: 4rem;
-            margin-bottom: 4rem;
-            padding-top: 2.5rem;
-            padding-bottom: 2.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-
-            /* Animation */
-            animation: fadeInSlideDown 1s ease-out 0.6s forwards; /* Staggered after video */
-        }
-        .overarching-themes h2 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #f0f0f0;
-        }
-        .theme-tag-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1rem;
-        }
-        .theme-tag {
-            background-color: #3b82f6;
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 9999px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            cursor: pointer;
-        }
-        .theme-tag:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.4);
-        }
-        .theme-tag.active {
-            background-color: #60a5fa; /* Lighter blue when active */
-            box-shadow: 0 0 15px rgba(96, 165, 250, 0.7); /* Stronger glow when active */
-            transform: scale(1.05); /* Slightly larger when active */
-        }
-
-        /* Responsive Video Embed */
-        .video-responsive {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
-            height: 0;
-            overflow: hidden;
-            max-width: 100%;
-            background: #000;
-            margin: 4rem auto; /* Spacing above and below video */
-            border-radius: 1rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            pointer-events: auto; /* Ensure video is clickable */
-
-            /* Animation for video embed */
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInSlideUp 1s ease-out 0.3s forwards; /* Staggered after h1 */
-        }
-        @keyframes fadeInSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .video-responsive iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-            border-radius: 1rem; /* Match parent border-radius */
-        }
-
-        .module-card {
-            background-color: #1a1a2e;
-            border-radius: 1.25rem;
-            padding: 2rem;
-            margin-bottom: 2.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            transition: transform 0.6s ease-out, opacity 0.6s ease-out, box-shadow 0.3s ease, border-color 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-
-            /* Initial state for scroll-reveal */
-            opacity: 0;
-            transform: translateY(50px);
-        }
-        /* State when element is in view */
-        .module-card.is-visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .module-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.2); /* Added white glow on hover */
-        }
-
-        /* States for theme filtering */
-        .module-card.dimmed {
-            opacity: 0.3;
-            transform: scale(0.98);
-            filter: grayscale(80%);
-            pointer-events: none; /* Disable clicks on dimmed cards */
-        }
-        .module-card.highlighted {
-            border-color: #60a5fa; /* Blue border for highlighted */
-            box-shadow: 0 0 25px rgba(96, 165, 250, 0.5); /* Blue glow */
-            transform: translateY(-5px) scale(1.01);
-            opacity: 1;
-            filter: none;
-        }
-        /* Ensure transitions on specific properties for dimmed/highlighted */
-        .module-card.dimmed, .module-card.highlighted {
-            transition: opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-        }
-
-        /* Temporary highlight on hover for theme tags */
-        .module-card.temp-highlight {
-            border-color: rgba(96, 165, 250, 0.5); /* Lighter blue border for temp highlight */
-            box-shadow: 0 0 15px rgba(96, 165, 250, 0.3); /* Subtle blue glow */
-            transform: translateY(-3px) scale(1.005);
-            opacity: 0.7; /* Slightly less opaque than full highlight */
-            filter: none;
-            transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-
-        .module-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.25rem;
-        }
-        .module-icon {
-            width: 40px;
-            height: 40px;
-            margin-right: 1rem;
-            flex-shrink: 0;
-            fill: currentColor;
-            /* Module icon pulse animation */
-            animation: moduleIconPulse 2s ease-in-out infinite alternate;
-        }
-        @keyframes moduleIconPulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
-        }
-
-        .module-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            line-height: 1.3;
-            color: #f0f0f0;
-        }
-        /* Responsive adjustments for module-title */
-        @media (max-width: 1024px) {
-            .module-title {
-                font-size: 1.4rem;
-            }
-        }
-        @media (max-width: 768px) {
-            .module-title {
-                font-size: 1.2rem;
-            }
-        }
-        @media (max-width: 480px) {
-            .module-title {
-                font-size: 1rem;
-            }
-        }
-
-        .submodule-section {
-            margin-top: 1.5rem;
-        }
-        .submodule-details {
-            background-color: #2a2a4a;
-            border-radius: 1rem;
-            padding: 1.25rem 1.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            overflow: hidden;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-            /* For smooth expand/collapse */
-            height: auto; /* Required for height transition */
-            max-height: 50px; /* Initial collapsed height, adjust as needed */
-            transition: max-height 0.4s ease-out; /* Smooth transition for height */
-        }
-        .submodule-details[open] {
-            max-height: 300px; /* Max height when open, adjust to fit content */
-        }
-        .submodule-details:hover {
-            background-color: #3a3a5a;
-            border-color: rgba(255, 255, 255, 0.25);
-        }
-        .submodule-summary {
-            font-size: 1.05rem;
-            font-weight: 600;
-            cursor: pointer;
-            color: #c0c0c0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            outline: none;
-            line-height: 1.4;
-        }
-        .submodule-summary::marker {
-            display: none;
-        }
-        .submodule-summary::-webkit-details-marker {
-            display: none;
-        }
-        .submodule-summary .arrow {
-            transition: transform 0.2s ease;
-            font-size: 0.9em;
-        }
-        .submodule-details[open] .submodule-summary .arrow {
-            transform: rotate(90deg);
-        }
-        .submodule-content {
-            padding-top: 1rem;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #b0b0b0;
-        }
-        .submodule-content ul {
-            list-style: none;
-            padding-left: 0;
-            margin-top: 0.75rem;
-        }
-        .submodule-content ul li {
-            margin-bottom: 0.4rem;
-            display: flex;
-            align-items: flex-start;
-        }
-        .submodule-content ul li::before {
-                content: '•';
-                color: #60a5fa;
-                display: inline-block;
-                width: 1.2em;
-                margin-left: -1.2em;
-                flex-shrink: 0;
-        }
-        .submodule-content strong {
-            color: #f0f0f0;
-        }
-
-        /* Network Line Styles */
-        .network-line {
-            stroke: rgba(255, 255, 255, 0.1); /* Subtle white lines */
-            stroke-width: 1.5;
-            transition: stroke 0.4s ease, stroke-width 0.4s ease, opacity 0.4s ease;
-            /* Animation for flow */
-            animation: line-flow var(--line-animation-speed) linear infinite;
-        }
-        /* Keyframes for line flow */
-        @keyframes line-flow {
-            from { stroke-dashoffset: var(--line-length); }
-            to { stroke-dashoffset: 0; }
-        }
-
-        .network-line.highlighted {
-            stroke: #FFD700; /* Gold for highlighted lines */
-            stroke-width: 3;
-            opacity: 0.8;
-            --line-animation-speed: 2s; /* Faster flow when highlighted */
-        }
-        .network-line.dimmed {
-            stroke: rgba(255, 255, 255, 0.05); /* Even more subtle when dimmed */
-            opacity: 0.05;
-            stroke-width: 1;
-            animation: none; /* No flow when dimmed */
-        }
-
-        /* Back to Top Button */
-        #back-to-top {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background-color: #3b82f6;
-            color: white;
-            padding: 0.8rem 1rem;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            line-height: 1;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            opacity: 0;
-            transform: translateY(20px);
-            z-index: 1000;
-            border: none;
-        }
-        #back-to-top.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        #back-to-top:hover {
-            background-color: #2563eb;
-            transform: translateY(-5px);
-        }
-    </style>
+  <meta charset="utf-8" />
+  <title>Writing for a Change 3D</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <!-- React + ReactDOM UMD -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel (compile JSX in-browser) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Three.js UMD -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <style>
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: #0d0d1a;
+      color: #e0e0e0;
+      overflow-x: hidden;
+    }
+    /* Fixed 3D canvas behind everything */
+    #bg3d {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+    /* Content sits above */
+    #root {
+      position: relative;
+      z-index: 10;
+    }
+  </style>
 </head>
 <body>
-    <canvas id="background-canvas"></canvas>
-    <svg id="network-svg-overlay"></svg> <!-- SVG for network lines -->
+  <canvas id="bg3d"></canvas>
+  <div id="root"></div>
 
-    <div class="container">
-        <h1>Writing for a Change 2.0</h1>
+  <script type="text/babel">
+    const { useEffect, useMemo, useRef, useState } = React;
 
-        <!-- YouTube Video Embed Section -->
-        <div class="video-responsive">
-            <iframe
+    // ---------- Data ----------
+    const THEMES = [
+      "POWER DYNAMICS & GOVERNANCE",
+      "ETHICS OF REPRESENTATION & WITNESSING",
+      "MATERIALITY & INFRASTRUCTURE",
+      "AFFECT & EMOTION",
+      "FUTURES & IMAGINATION",
+    ];
+
+    const MODULES = [
+      {
+        id: "M1",
+        color: "#1A2B4C",
+        title: "Module 1: Narrative as Social Power",
+        themes: ["POWER DYNAMICS & GOVERNANCE","MATERIALITY & INFRASTRUCTURE","AFFECT & EMOTION"],
+        subs: [
+          { h: "1.1 The Narrative Construction of Reality",
+            bullets: [
+              "Concepts: Narrative coherence, Performativity, Intra-action",
+              "Theories/Lenses: Constructivism, New Materialisms, STS",
+            ]},
+          { h: "1.2 Master Narratives and Counter-Narratives",
+            bullets: [
+              "Concepts: Hegemony, Discourse, Ideology",
+              "Theories/Lenses: Foucauldian discourse analysis, Gramscian hegemony",
+            ]},
+          { h: "1.3 Memes, Myths, and Collective Sense-Making",
+            bullets: [
+              "Concepts: Collective memory, Cultural scripts, Myth-making",
+              "Theories/Lenses: Semiotics, Cultural studies",
+            ]},
+        ],
+      },
+      {
+        id: "M2",
+        color: "#228B22",
+        title: "Module 2: Storytelling for Resistance and Transformation",
+        themes: ["ETHICS OF REPRESENTATION & WITNESSING","AFFECT & EMOTION","FUTURES & IMAGINATION"],
+        subs: [
+          { h: "2.1 Testimonio and Bearing Witness",
+            bullets: [
+              "Concepts: Voice, Silence, Trauma, Solidarity",
+              "Theories/Lenses: Critical race theory, Decolonial studies",
+            ]},
+          { h: "2.2 Strategic Essentialism and Identity Narratives",
+            bullets: [
+              "Concepts: Identity politics, Agency, Intersectionality",
+              "Theories/Lenses: Postcolonial theory, Queer theory",
+            ]},
+          { h: "2.3 Mythopoesis and Re-imagining Futures",
+            bullets: [
+              "Concepts: Utopia, Dystopia, Speculative fiction",
+              "Theories/Lenses: Futures studies, Critical pedagogy",
+            ]},
+        ],
+      },
+      {
+        id: "M3",
+        color: "#FFA500",
+        title: "Module 3: Digital Storytelling and Narrative Democracies",
+        themes: ["POWER DYNAMICS & GOVERNANCE","ETHICS OF REPRESENTATION & WITNESSING","MATERIALITY & INFRASTRUCTURE","AFFECT & EMOTION"],
+        subs: [
+          { h: "3.1 Platformed Testimonies and Digital Publics",
+            bullets: [
+              "Concepts: Networked publics, Affordances, Virality",
+              "Theories/Lenses: Media ecology, Platform studies",
+            ]},
+          { h: "3.2 Data Colonialism and Algorithmic Governance",
+            bullets: [
+              "Concepts: Surveillance capitalism, Datafication, Bias",
+              "Theories/Lenses: Critical data studies, Political economy of communication",
+            ]},
+          { h: "3.3 Viral Genres and Participatory Narratives",
+            bullets: [
+              "Concepts: Remix culture, Memetic spread, Fandom",
+              "Theories/Lenses: Convergence culture, Audience studies",
+            ]},
+        ],
+      },
+      {
+        id: "M4",
+        color: "#800080",
+        title: "Module 4: From Writer to Narrative Architect",
+        themes: ["MATERIALITY & INFRASTRUCTURE","FUTURES & IMAGINATION"],
+        subs: [
+          { h: "4.1 Transmedia Storytelling and World-building",
+            bullets: [
+              "Concepts: Narrative universes, Canon, Lore",
+              "Theories/Lenses: Transmedia studies, Narratology",
+            ]},
+          { h: "4.2 Immersive Narratives and Experiential Design",
+            bullets: [
+              "Concepts: Presence, Embodiment, Agency",
+              "Theories/Lenses: Game studies, Interaction design",
+            ]},
+          { h: "4.3 Narrative Strategy and Social Impact Campaigns",
+            bullets: [
+              "Concepts: Persuasion, Framing, Advocacy",
+              "Theories/Lenses: Communication for social change, Rhetoric",
+            ]},
+        ],
+      },
+      {
+        id: "M5",
+        color: "#808080",
+        title: "Module 5: Ethics and Politics of Storytelling",
+        themes: ["POWER DYNAMICS & GOVERNANCE","ETHICS OF REPRESENTATION & WITNESSING","AFFECT & EMOTION"],
+        subs: [
+          { h: "5.1 Voice, Silence, and Representation",
+            bullets: [
+              "Concepts: Authenticity, Appropriation, Stereotypes",
+              "Theories/Lenses: Post-structuralism, Feminist theory",
+            ]},
+          { h: "5.2 The Right to Narrate and Narrative Justice",
+            bullets: [
+              "Concepts: Epistemic injustice, Restorative narratives, Reparation",
+              "Theories/Lenses: Human rights discourse, Transitional justice",
+            ]},
+          { h: "5.3 Responsibility, Relationality, and Care in Storytelling",
+            bullets: [
+              "Concepts: Empathy, Vulnerability, Solidarity",
+              "Theories/Lenses: Ethics of care, Phenomenology",
+            ]},
+        ],
+      },
+      {
+        id: "M6",
+        color: "#00CED1",
+        title: "Module 6: Narrating with AI",
+        themes: ["POWER DYNAMICS & GOVERNANCE","ETHICS OF REPRESENTATION & WITNESSING","MATERIALITY & INFRASTRUCTURE","FUTURES & IMAGINATION"],
+        subs: [
+          { h: "6.1 AI as Co-creator and Narrative Generator",
+            bullets: [
+              "Concepts: Generative models, Algorithmic creativity, Authorship",
+              "Theories/Lenses: AI ethics, Human-computer interaction",
+            ]},
+          { h: "6.2 Bias, Algorithmic Memory, and Data Silos",
+            bullets: [
+              "Concepts: Algorithmic bias, Echo chambers, Filter bubbles",
+              "Theories/Lenses: Critical algorithm studies, Information theory",
+            ]},
+          { h: "6.3 Future of Narrative, AI, and Human Experience",
+            bullets: [
+              "Concepts: Posthumanism, Singularity, Consciousness",
+              "Theories/Lenses: Philosophy of technology, Cybernetics",
+            ]},
+        ],
+      },
+    ];
+
+    // ---------- Three.js background ----------
+    function useThreeBackground() {
+      useEffect(() => {
+        const canvas = document.getElementById("bg3d");
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+        camera.position.set(0, 0, 10);
+
+        const ambient = new THREE.AmbientLight(0xffffff, 0.15);
+        scene.add(ambient);
+
+        // Points
+        const COUNT = 550;
+        const positions = new Float32Array(COUNT * 3);
+        const velocities = new Float32Array(COUNT * 3);
+        for (let i = 0; i < COUNT; i++) {
+          positions[i*3+0] = (Math.random() - 0.5) * 16;
+          positions[i*3+1] = (Math.random() - 0.5) * 10;
+          positions[i*3+2] = (Math.random() - 0.5) * 16;
+          velocities[i*3+0] = (Math.random() - 0.5) * 0.01;
+          velocities[i*3+1] = (Math.random() - 0.5) * 0.01;
+          velocities[i*3+2] = (Math.random() - 0.5) * 0.01;
+        }
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+        const mat = new THREE.PointsMaterial({ size: 0.035, color: 0xffffff, transparent: true, opacity: 0.65 });
+        const points = new THREE.Points(geom, mat);
+        scene.add(points);
+
+        // Gentle linking lines
+        const lineGroup = new THREE.Group();
+        scene.add(lineGroup);
+        const PAIRS = 80;
+        const endpoints = [];
+        for (let i = 0; i < PAIRS; i++) {
+          const a = new THREE.Vector3((Math.random()-0.5)*12, (Math.random()-0.5)*8, (Math.random()-0.5)*12);
+          const b = new THREE.Vector3((Math.random()-0.5)*12, (Math.random()-0.5)*8, (Math.random()-0.5)*12);
+          const vA = new THREE.Vector3((Math.random()-0.5)*0.008, (Math.random()-0.5)*0.008, (Math.random()-0.5)*0.008);
+          const vB = new THREE.Vector3((Math.random()-0.5)*0.008, (Math.random()-0.5)*0.008, (Math.random()-0.5)*0.008);
+          const geo = new THREE.BufferGeometry().setFromPoints([a, b]);
+          const mat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.12 });
+          const line = new THREE.Line(geo, mat);
+          lineGroup.add(line);
+          endpoints.push({ a, b, vA, vB, geo });
+        }
+
+        function resize() {
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          renderer.setSize(w, h);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+        resize();
+        window.addEventListener("resize", resize);
+
+        let t = 0;
+        const animate = () => {
+          // Animate points
+          const arr = geom.attributes.position.array;
+          for (let i = 0; i < COUNT; i++) {
+            const i3 = i*3;
+            arr[i3+0] += velocities[i3+0];
+            arr[i3+1] += velocities[i3+1];
+            arr[i3+2] += velocities[i3+2];
+            // Soft bounds
+            for (let k = 0; k < 3; k++) {
+              if (arr[i3+k] > 10 || arr[i3+k] < -10) velocities[i3+k] *= -1;
+            }
+          }
+          geom.attributes.position.needsUpdate = true;
+
+          // Animate lines
+          endpoints.forEach(e => {
+            e.a.add(e.vA);
+            e.b.add(e.vB);
+            // Soft bounds
+            ["x","y","z"].forEach(axis => {
+              if (e.a[axis] > 8 || e.a[axis] < -8) e.vA[axis] *= -1;
+              if (e.b[axis] > 8 || e.b[axis] < -8) e.vB[axis] *= -1;
+            });
+            e.geo.setFromPoints([e.a, e.b]);
+          });
+
+          // Slow camera drift
+          t += 0.002;
+          camera.position.x = Math.sin(t) * 0.6 + 0.0;
+          camera.position.y = Math.cos(t * 0.7) * 0.4;
+          camera.lookAt(0, 0, 0);
+
+          renderer.render(scene, camera);
+          requestAnimationFrame(animate);
+        };
+        animate();
+
+        return () => {
+          window.removeEventListener("resize", resize);
+          renderer.dispose();
+        };
+      }, []);
+    }
+
+    // ---------- UI ----------
+    function BackToTop() {
+      const [show, setShow] = useState(false);
+      useEffect(() => {
+        const onScroll = () => setShow(window.scrollY > 300);
+        window.addEventListener("scroll", onScroll);
+        return () => window.removeEventListener("scroll", onScroll);
+      }, []);
+      return (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className={[
+            "fixed bottom-8 right-8 z-[1000] rounded-full bg-blue-500 text-white shadow-xl w-12 h-12 text-xl transition duration-300",
+            show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5",
+          ].join(" ")}
+          title="Back to Top"
+        >
+          ▲
+        </button>
+      );
+    }
+
+    function ThemeTags({ activeTheme, setActiveTheme }) {
+      return (
+        <div className="mt-16 mb-16 py-10 border-y border-white/10">
+          <h2 className="text-center text-2xl font-bold mb-6 text-gray-100">Overarching Themes</h2>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {THEMES.map(t => (
+              <span
+                key={t}
+                className={[
+                  "px-4 py-2 rounded-full text-sm font-semibold cursor-pointer shadow-sm transition",
+                  activeTheme === t
+                    ? "bg-blue-400 text-white shadow-blue-500/40"
+                    : "bg-blue-500 hover:bg-blue-600 text-white",
+                ].join(" ")}
+                onClick={() => setActiveTheme(prev => (prev === t ? null : t))}
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function Submodule({ h, bullets }) {
+      const [open, setOpen] = useState(false);
+      return (
+        <details
+          className="bg-[#2a2a4a] border border-white/20 rounded-xl px-6 py-4 mb-3 overflow-hidden transition"
+          open={open}
+          onToggle={e => setOpen(e.target.open)}
+        >
+          <summary className="list-none flex items-center justify-between text-gray-200 font-semibold cursor-pointer">
+            <span>{h}</span>
+            <span className={["transition transform", open ? "rotate-90" : "rotate-0"].join(" ")}>▶</span>
+          </summary>
+          <div className="pt-3 text-sm leading-6 text-gray-300">
+            <ul className="mt-2 space-y-1">
+              {bullets.map((b, i) => (
+                <li key={i} className="pl-4 relative"><span className="absolute left-0">•</span> {b}</li>
+              ))}
+            </ul>
+          </div>
+        </details>
+      );
+    }
+
+    function ModuleCard({ m, activeTheme, index }) {
+      const isFiltered = activeTheme && !m.themes.includes(activeTheme);
+      return (
+        <div
+          className={[
+            "rounded-2xl border backdrop-blur-sm p-6 mb-8 shadow-2xl transition will-change-transform",
+            isFiltered ? "opacity-30 grayscale pointer-events-none scale-[0.98]" : "",
+          ].join(" ")}
+          style={{ backgroundColor: "#1a1a2e", borderColor: "rgba(255,255,255,0.08)" }}
+        >
+          <div className="flex items-center mb-4" style={{ color: m.color }}>
+            <svg className="w-10 h-10 mr-3" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <path d="M4 19.5V15a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4.5"></path>
+              <path d="M12 13V9"></path>
+              <path d="M10 11H14"></path>
+            </svg>
+            <h3 className="text-xl md:text-2xl font-extrabold text-gray-100">{m.title}</h3>
+          </div>
+          <div className="mt-3">
+            {m.subs.map((s, i) => <Submodule key={i} h={s.h} bullets={s.bullets} />)}
+          </div>
+        </div>
+      );
+    }
+
+    function Header() {
+      return (
+        <header className="pt-16 md:pt-24">
+          <h1
+            className="text-center uppercase tracking-tight text-gray-100"
+            style={{ textShadow: "0 0 30px rgba(255,255,255,0.4)" }}
+          >
+            <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.95]">
+              Writing for a Change 2.0
+            </span>
+          </h1>
+          <div
+            className="relative w-full max-w-5xl mx-auto mt-12 rounded-2xl overflow-hidden shadow-2xl"
+          >
+            <div className="relative" style={{ paddingBottom: "56.25%" }}>
+              <iframe
+                className="absolute inset-0 w-full h-full"
                 src="https://www.youtube.com/embed/btkAvUiNvvc?autoplay=1&mute=1&controls=0&loop=1&playlist=btkAvUiNvvc"
-                title="YouTube video player"
-                frameborder="0"
+                title="Course trailer"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-            </iframe>
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    function App() {
+      const [activeTheme, setActiveTheme] = useState(null);
+      useThreeBackground();
+
+      return (
+        <div className="relative min-h-screen max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+          <Header />
+          <ThemeTags activeTheme={activeTheme} setActiveTheme={setActiveTheme} />
+          <section className="mt-4 mb-24">
+            {MODULES.map((m, i) => (
+              <ModuleCard key={m.id} m={m} index={i} activeTheme={activeTheme} />
+            ))}
+          </section>
+          <BackToTop />
         </div>
+      );
+    }
 
-        <div class="overarching-themes">
-            <h2>Overarching Themes</h2>
-            <div class="theme-tag-container">
-                <span class="theme-tag" data-theme="POWER DYNAMICS & GOVERNANCE">POWER DYNAMICS & GOVERNANCE</span>
-                <span class="theme-tag" data-theme="ETHICS OF REPRESENTATION & WITNESSING">ETHICS OF REPRESENTATION & WITNESSING</span>
-                <span class="theme-tag" data-theme="MATERIALITY & INFRASTRUCTURE">MATERIALITY & INFRASTRUCTURE</span>
-                <span class="theme-tag" data-theme="AFFECT & EMOTION">AFFECT & EMOTION</span>
-                <span class="theme-tag" data-theme="FUTURES & IMAGINATION">FUTURES & IMAGINATION</span>
-            </div>
-        </div>
-
-        <div class="module-grid">
-            <!-- Module 1 -->
-            <div class="module-card" data-module-id="M1" data-themes="POWER DYNAMICS & GOVERNANCE, MATERIALITY & INFRASTRUCTURE, AFFECT & EMOTION" style="border-color: #1A2B4C;">
-                <div class="module-header" style="color: #1A2B4C;">
-                    <svg class="module-icon" viewBox="0 0 24 24">
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                      <path d="M4 19.5V15a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4.5"></path>
-                      <path d="M12 13V9"></path>
-                      <path d="M10 11H14"></path>
-                    </svg>
-                    <h2 class="module-title">Module 1: Narrative as Social Power</h2>
-                </div>
-                <div class="submodule-section">
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            1.1 The Narrative Construction of Reality
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Narrative coherence, Performativity, Intra-action</li>
-                                <li><strong>Theories/Lenses:</strong> Constructivism, New Materialisms, STS</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            1.2 Master Narratives and Counter-Narratives
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Hegemony, Discourse, Ideology</li>
-                                <li><strong>Theories/Lenses:</strong> Foucauldian discourse analysis, Gramscian hegemony</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            1.3 Memes, Myths, and Collective Sense-Making
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Collective memory, Cultural scripts, Myth-making</li>
-                                <li><strong>TTheories/Lenses:</strong> Semiotics, Cultural studies</li>
-                            </ul>
-                        </div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Module 2 -->
-            <div class="module-card" data-module-id="M2" data-themes="ETHICS OF REPRESENTATION & WITNESSING, AFFECT & EMOTION, FUTURES & IMAGINATION" style="border-color: #228B22;">
-                <div class="module-header" style="color: #228B22;">
-                    <svg class="module-icon" viewBox="0 0 24 24">
-                      <path d="M18 10V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4"></path>
-                      <path d="M14 18v-4a2 2 0 0 0-2-2H6"></path>
-                      <path d="M10 18v-4a2 2 0 0 0-2-2H6"></path>
-                      <path d="M6 18v-4a2 2 0 0 0-2-2H4"></path>
-                      <path d="M18 14H16"></path>
-                    </svg>
-                    <h2 class="module-title">Module 2: Storytelling for Resistance and Transformation</h2>
-                </div>
-                <div class="submodule-section">
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            2.1 Testimonio and Bearing Witness
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Voice, Silence, Trauma, Solidarity</li>
-                                <li><strong>Theories/Lenses:</strong> Critical race theory, Decolonial studies</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            2.2 Strategic Essentialism and Identity Narratives
-                        <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Identity politics, Agency, Intersectionality</li>
-                                <li><strong>Theories/Lenses:</strong> Postcolonial theory, Queer theory</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            2.3 Mythopoesis and Re-imagining Futures
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Utopia, Dystopia, Speculative fiction</li>
-                                <li><strong>Theories/Lenses:</strong> Futures studies, Critical pedagogy</li>
-                            </ul>
-                        </div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Module 3 -->
-            <div class="module-card" data-module-id="M3" data-themes="POWER DYNAMICS & GOVERNANCE, ETHICS OF REPRESENTATION & WITNESSING, MATERIALITY & INFRASTRUCTURE, AFFECT & EMOTION" style="border-color: #FFA500;">
-                <div class="module-header" style="color: #FFA500;">
-                    <svg class="module-icon" viewBox="0 0 24 24">
-                      <path d="M5 12.55s2.55-2.55 7-2.55 7 2.55 7 2.55"></path>
-                      <path d="M12 20v-8"></path>
-                      <path d="M2 8.5c5.33-4.66 12.67-4.66 18 0"></path>
-                      <path d="M0 5s9-3 18 0"></path>
-                    </svg>
-                    <h2 class="module-title">Module 3: Digital Storytelling and Narrative Democracies</h2>
-                </div>
-                <div class="submodule-section">
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            3.1 Platformed Testimonies and Digital Publics
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Networked publics, Affordances, Virality</li>
-                                <li><strong>Theories/Lenses:</strong> Media ecology, Platform studies</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            3.2 Data Colonialism and Algorithmic Governance
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Surveillance capitalism, Datafication, Bias</li>
-                                <li><strong>Theories/Lenses:</strong> Critical data studies, Political economy of communication</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            3.3 Viral Genres and Participatory Narratives
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Remix culture, Memetic spread, Fandom</li>
-                                <li><strong>TTheories/Lenses:</strong> Convergence culture, Audience studies</li>
-                            </ul>
-                        </div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Module 4 -->
-            <div class="module-card" data-module-id="M4" data-themes="MATERIALITY & INFRASTRUCTURE, FUTURES & IMAGINATION" style="border-color: #800080;">
-                <div class="module-header" style="color: #800080;">
-                    <svg class="module-icon" viewBox="0 0 24 24">
-                      <path d="M16.5 16.5L12 21L7.5 16.5"></path>
-                      <path d="M12 21V3"></path>
-                      <path d="M18 12H6"></path>
-                      <path d="M15 9H9"></path>
-                      <path d="M18 15H6"></path>
-                    </svg>
-                    <h2 class="module-title">Module 4: From Writer to Narrative Architect</h2>
-                </div>
-                <div class="submodule-section">
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                          4.1 Transmedia Storytelling and World-building
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Narrative universes, Canon, Lore</li>
-                                <li><strong>Theories/Lenses:</strong> Transmedia studies, Narratology</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            4.2 Immersive Narratives and Experiential Design
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Presence, Embodiment, Agency</li>
-                                <li><strong>Theories/Lenses:</strong> Game studies, Interaction design</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            4.3 Narrative Strategy and Social Impact Campaigns
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Persuasion, Framing, Advocacy</li>
-                                <li><strong>Theories/Lenses:</strong> Communication for social change, Rhetoric</li>
-                            </ul>
-                        </div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Module 5 -->
-            <div class="module-card" data-module-id="M5" data-themes="POWER DYNAMICS & GOVERNANCE, ETHICS OF REPRESENTATION & WITNESSING, AFFECT & EMOTION" style="border-color: #808080;">
-                <div class="module-header" style="color: #808080;">
-                    <svg class="module-icon" viewBox="0 0 24 24">
-                      <path d="M12 3v18"></path>
-                      <path d="M3 15h18"></path>
-                      <path d="M16 11l-4-8-4 8h8z"></path>
-                      <path d="M12 15v6"></path>
-                    </svg>
-                    <h2 class="module-title">Module 5: Ethics and Politics of Storytelling</h2>
-                </div>
-                <div class="submodule-section">
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            5.1 Voice, Silence, and Representation
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Authenticity, Appropriation, Stereotypes</li>
-                                <li><strong>Theories/Lenses:</strong> Post-structuralism, Feminist theory</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            5.2 The Right to Narrate and Narrative Justice
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Epistemic injustice, Restorative narratives, Reparation</li>
-                                <li><strong>Theories/Lenses:</strong> Human rights discourse, Transitional justice</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            5.3 Responsibility, Relationality, and Care in Storytelling
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Empathy, Vulnerability, Solidarity</li>
-                                <li><strong>Theories/Lenses:</strong> Ethics of care, Phenomenology</li>
-                            </ul>
-                        </div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- Module 6 -->
-            <div class="module-card" data-module-id="M6" data-themes="POWER DYNAMICS & GOVERNANCE, ETHICS OF REPRESENTATION & WITNESSING, MATERIALITY & INFRASTRUCTURE, FUTURES & IMAGINATION" style="border-color: #00CED1;">
-                <div class="module-header" style="color: #00CED1;">
-                    <svg class="module-icon" viewBox="0 0 24 24">
-                      <rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect>
-                      <path d="M7 7h10v10H7z"></path>
-                      <line x1="12" y1="2" x2="12" y2="7"></line>
-                      <line x1="12" y1="17" x2="12" y2="22"></line>
-                      <line x1="2" y1="12" x2="7" y2="12"></line>
-                      <line x1="17" y1="12" x2="22" y2="12"></line>
-                    </svg>
-                    <h2 class="module-title">Module 6: Narrating with AI</h2>
-                </div>
-                <div class="submodule-section">
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            6.1 AI as Co-creator and Narrative Generator
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Generative models, Algorithmic creativity, Authorship</li>
-                                <li><strong>Theories/Lenses:</strong> AI ethics, Human-computer interaction</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                            6.2 Bias, Algorithmic Memory, and Data Silos
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Algorithmic bias, Echo chambers, Filter bubbles</li>
-                                <li><strong>Theories/Lenses:</strong> Critical algorithm studies, Information theory</li>
-                            </ul>
-                        </div>
-                    </details>
-                    <details class="submodule-details">
-                        <summary class="submodule-summary">
-                          6.3 Future of Narrative, AI, and Human Experience
-                            <span class="arrow">▶</span>
-                        </summary>
-                        <div class="submodule-content">
-                            <ul>
-                                <li><strong>Concepts:</strong> Posthumanism, Singularity, Consciousness</li>
-                                <li><strong>Theories/Lenses:</strong> Philosophy of technology, Cybernetics</li>
-                            </ul>
-                        </div>
-                    </details>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <button id="back-to-top" title="Back to Top">▲</button>
-
-    <script>
-        // --- Background Canvas Animation ---
-        const backgroundCanvas = document.getElementById('background-canvas');
-        const backgroundCtx = backgroundCanvas.getContext('2d');
-
-        let bgWidth, bgHeight;
-        let bgNodes = [];
-        const bgNumNodes = 100;
-        const bgMaxNodeRadius = 1.5;
-        const bgMaxLineDistance = 80;
-        const bgNodeSpeed = 0.2;
-
-        const resizeBackgroundCanvas = () => {
-            bgWidth = window.innerWidth;
-            bgHeight = window.innerHeight;
-            backgroundCanvas.width = bgWidth;
-            backgroundCanvas.height = bgHeight;
-            generateBackgroundNodes();
-        };
-
-        const generateBackgroundNodes = () => {
-            bgNodes = [];
-            for (let i = 0; i < bgNumNodes; i++) {
-                bgNodes.push({
-                    x: Math.random() * bgWidth,
-                    y: Math.random() * bgHeight,
-                    radius: Math.random() * bgMaxNodeRadius + 0.2,
-                    vx: (Math.random() - 0.5) * bgNodeSpeed,
-                    vy: (Math.random() - 0.5) * bgNodeSpeed,
-                    opacity: Math.random() * 0.2 + 0.05
-                });
-            }
-        };
-
-        const drawBackground = () => {
-            backgroundCtx.fillStyle = 'rgba(13, 13, 26, 0.05)';
-            backgroundCtx.fillRect(0, 0, bgWidth, bgHeight);
-        };
-
-        const drawBackgroundNetwork = () => {
-            backgroundCtx.clearRect(0, 0, bgWidth, bgHeight);
-            drawBackground();
-
-            bgNodes.forEach(node => {
-                node.x += node.vx;
-                node.y += node.vy;
-
-                if (node.x < 0 || node.x > bgWidth) node.vx *= -1;
-                if (node.y < 0 || node.y > bgHeight) node.vy *= -1;
-
-                backgroundCtx.beginPath();
-                backgroundCtx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-                backgroundCtx.fillStyle = `rgba(255, 255, 255, ${node.opacity})`;
-                backgroundCtx.fill();
-
-                bgNodes.forEach(otherNode => {
-                    const dist = Math.sqrt(Math.pow(node.x - otherNode.x, 2) + Math.pow(node.y - otherNode.y, 2));
-                    if (dist < bgMaxLineDistance) {
-                        backgroundCtx.beginPath();
-                        backgroundCtx.moveTo(node.x, node.y);
-                        backgroundCtx.lineTo(otherNode.x, otherNode.y);
-                        backgroundCtx.strokeStyle = `rgba(255, 255, 255, ${0.05 - (dist / bgMaxLineDistance) * 0.05})`;
-                        backgroundCtx.lineWidth = 0.3;
-                        backgroundCtx.stroke();
-                    }
-                });
-            });
-            requestAnimationFrame(drawBackgroundNetwork);
-        };
-
-        // --- Interactive Features ---
-
-        // 1. Initial Load Animation (CSS handled for h1, overarching-themes, video)
-
-        // 2. Scroll-Reveal Animation
-        const moduleCards = document.querySelectorAll('.module-card');
-
-        const observerOptions = {
-            root: null, // viewport
-            rootMargin: '0px',
-            threshold: 0.1 // 10% of element visible
-        };
-
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                    observer.unobserve(entry.target); // Only animate once
-                }
-            });
-        }, observerOptions);
-
-        moduleCards.forEach(card => {
-            observer.observe(card);
-        });
-
-        // 3. Smooth Expand/Collapse for Submodules
-        document.querySelectorAll('.submodule-details').forEach(details => {
-            details.addEventListener('toggle', () => {
-                if (details.open) {
-                    details.style.maxHeight = details.scrollHeight + 'px';
-                } else {
-                    details.style.maxHeight = '50px';
-                }
-                // Redraw lines when a module card's height changes
-                // This is important because expanding/collapsing changes the card's position
-                // which affects where the network lines should connect.
-                drawNetworkLines();
-            });
-            if (!details.open) {
-                details.style.maxHeight = '50px';
-            }
-        });
-
-        // 4. Network Line Drawing (SVG Overlay)
-        const networkSvg = document.getElementById('network-svg-overlay');
-
-        // Define connections between modules (using data-module-id)
-        const connections = [
-            { from: "M1", to: "M2" },
-            { from: "M1", to: "M3" },
-            { from: "M2", to: "M3" },
-            { from: "M3", to: "M6" },
-            { from: "M4", to: "M2" },
-            { from: "M6", to: "M5" },
-            { from: "M5", to: "M4" },
-            { from: "M5", to: "M6" },
-            { from: "M1", to: "M5" },
-            { from: "M2", to: "M4" },
-            { from: "M3", to: "M4" },
-            { from: "M4", to: "M6" },
-            // Add more logical connections here if desired
-        ];
-
-        let networkLines = {}; // Store references to SVG line elements by their connection ID
-
-        function getElementCenter(element) {
-            const rect = element.getBoundingClientRect();
-            return {
-                x: rect.left + rect.width / 2,
-                y: rect.top + rect.height / 2
-            };
-        }
-
-        function drawNetworkLines() {
-            // Clear existing lines
-            networkSvg.innerHTML = '';
-            networkLines = {}; // Reset stored lines
-
-            connections.forEach((conn, index) => {
-                const fromCard = document.querySelector(`[data-module-id="${conn.from}"]`);
-                const toCard = document.querySelector(`[data-module-id="${conn.to}"]`);
-
-                if (fromCard && toCard) {
-                    const fromCenter = getElementCenter(fromCard);
-                    const toCenter = getElementCenter(toCard);
-
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    line.setAttribute('x1', fromCenter.x);
-                    line.setAttribute('y1', fromCenter.y);
-                    line.setAttribute('x2', toCenter.x);
-                    line.setAttribute('y2', toCenter.y);
-                    line.setAttribute('class', 'network-line'); // Apply base styling
-                    line.setAttribute('data-connection-id', `${conn.from}-${conn.to}`); // Unique ID for line
-
-                    // Calculate line length for stroke-dasharray animation
-                    const dx = toCenter.x - fromCenter.x;
-                    const dy = toCenter.y - fromCenter.y;
-                    const length = Math.sqrt(dx * dx + dy * dy);
-
-                    line.style.setProperty('--line-length', `${length}px`); // Add 'px' unit
-                    line.style.setProperty('--line-animation-speed', '5s'); // Default speed
-                    line.setAttribute('stroke-dasharray', `${length} ${length}`);
-                    line.setAttribute('stroke-dashoffset', length); // Start dash at the end for flow effect
-              networkSvg.appendChild(line);
-                    networkLines[`${conn.from}-${conn.to}`] = line;
-                }
-            });
-            // Reapply current filter state after redrawing lines
-            applyThemeFilter(activeTheme);
-        }
-
-        // 5. Overarching Theme Filtering (Affects Cards AND Network Lines)
-        const themeTags = document.querySelectorAll('.theme-tag');
-        let activeTheme = null; // Stores the currently *clicked* active theme
-
-        const applyThemeFilter = (themeToFilter, isHover = false) => {
-            moduleCards.forEach(card => {
-                const cardThemes = card.dataset.themes.split(', ').map(t => t.trim());
-                const cardId = card.dataset.moduleId;
-
-                // Clear all previous highlight/dim states for non-active filters
-                card.classList.remove('dimmed', 'highlighted', 'temp-highlight');
-
-                if (themeToFilter === null) {
-                    // No active filter (either clicked or hovered), show all
-                    card.style.pointerEvents = 'auto'; // Re-enable clicks
-                } else {
-                    if (cardThemes.includes(themeToFilter)) {
-                        if (isHover) {
-                            if (activeTheme === null) { // Only apply temp highlight if no permanent filter is active
-                                card.classList.add('temp-highlight');
-                            }
-                        } else {
-                            card.classList.add('highlighted');
-                            card.style.pointerEvents = 'auto';
-                        }
-                    } else {
-                        card.classList.add('dimmed');
-                        card.style.pointerEvents = 'none';
-                    }
-                }
-            });
-
-            // Update network lines based on filter
-            connections.forEach(conn => {
-                const line = networkLines[`${conn.from}-${conn.to}`];
-                if (!line) return;
-
-                const fromCard = document.querySelector(`[data-module-id="${conn.from}"]`);
-                const toCard = document.querySelector(`[data-module-id="${conn.to}"]`);
-
-                const fromCardThemes = fromCard ? fromCard.dataset.themes.split(', ').map(t => t.trim()) : [];
-                const toCardThemes = toCard ? toCard.dataset.themes.split(', ').map(t => t.trim()) : [];
-
-                // Reset line classes
-                line.classList.remove('highlighted', 'dimmed');
-
-                if (themeToFilter === null) {
-                    // No filter, reset to default subtle
-                    line.style.animation = ''; // Resume default animation
-                    line.style.setProperty('--line-animation-speed', '5s');
-                } else {
-                    // Highlight if BOTH connected modules are highlighted by the active theme
-                    const fromHighlighted = fromCardThemes.includes(themeToFilter);
-                    const toHighlighted = toCardThemes.includes(themeToFilter);
-
-                    if (fromHighlighted && toHighlighted) {
-                        line.classList.add('highlighted');
-                        line.style.animation = ''; // Resume animation
-                    } else {
-                        line.classList.add('dimmed');
-                        line.style.animation = 'none'; // Stop animation
-                    }
-                }
-            });
-        };
-
-        themeTags.forEach(tag => {
-            tag.addEventListener('click', () => {
-                const clickedTheme = tag.dataset.theme;
-
-                if (activeTheme === clickedTheme) {
-                    activeTheme = null;
-                    tag.classList.remove('active');
-                } else {
-                    if (activeTheme) {
-                        document.querySelector(`.theme-tag[data-theme="${activeTheme}"]`).classList.remove('active');
-                    }
-                    activeTheme = clickedTheme;
-                    tag.classList.add('active');
-                }
-                applyThemeFilter(activeTheme);
-            });
-
-            tag.addEventListener('mouseover', () => {
-                if (activeTheme === null) {
-                    applyThemeFilter(tag.dataset.theme, true);
-                }
-            });
-            tag.addEventListener('mouseout', () => {
-                if (activeTheme === null) {
-                    applyThemeFilter(null);
-                }
-            });
-        });
-
-        // 6. Back to Top Button
-        const backToTopButton = document.getElementById('back-to-top');
-
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTopButton.classList.add('show');
-            } else {
-                backToTopButton.classList.remove('show');
-            }
-            // Redraw lines on scroll to keep them connected to moving cards
-            // Debounce this for performance on rapid scrolling
-            clearTimeout(window.scrollRedrawTimeout);
-            window.scrollRedrawTimeout = setTimeout(drawNetworkLines, 50);
-        });
-
-        backToTopButton.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-
-
-        // --- Initial Setup 
-        window.addEventListener('resize', () => {
-            resizeBackgroundCanvas();
-            drawNetworkLines(); // Redraw network lines on resize
-        });
-
-        // Initial calls
-        resizeBackgroundCanvas();
-        drawBackgroundNetwork(); // Start background animation
-        // Delay initial drawNetworkLines to allow cards to render and get correct positions
-        window.addEventListener('load', drawNetworkLines);
-    </script>
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
 </body>
 </html>
+
