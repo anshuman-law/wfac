@@ -2,49 +2,82 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Writing for a Change 3D</title>
+  <title>Writing for a Change 2.0 — Interactive</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Tailwind CDN -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Inter font -->
+  <!-- Inter -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   <!-- React + ReactDOM UMD -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <!-- Babel (compile JSX in-browser) -->
+  <!-- Babel for JSX in the browser -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Three.js UMD -->
+  <!-- Three.js -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
   <style>
     html, body { height: 100%; }
     body {
       margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
       background: #0d0d1a;
       color: #e0e0e0;
       overflow-x: hidden;
     }
-    /* Fixed 3D canvas behind everything */
-    #bg3d {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
+    #bg3d { position: fixed; inset: 0; z-index: 0; }
+    #root { position: relative; z-index: 10; }
+    .type-caret { display:inline-block; width:1ch; border-right:2px solid currentColor; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { border-color: transparent; } }
+
+    /* Chapter scroller */
+    .chapter {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .6s ease, transform .6s ease;
     }
-    /* Content sits above */
-    #root {
-      position: relative;
-      z-index: 10;
+    .chapter.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Pulse for recommended modules */
+    .pulse-outline {
+      box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.6);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(96, 165, 250, .6); }
+      70% { box-shadow: 0 0 0 18px rgba(96, 165, 250, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); }
+    }
+
+    /* Tooltip for 3D network clicks */
+    #tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 99;
+      transform: translate(-50%, -120%);
+      background: rgba(17, 24, 39, .9);
+      color: #e5e7eb;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: .5rem;
+      padding: .5rem .6rem;
+      font-size: .85rem;
+      display: none;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
   <canvas id="bg3d"></canvas>
+  <div id="tooltip"></div>
   <div id="root"></div>
 
   <script type="text/babel">
     const { useEffect, useMemo, useRef, useState } = React;
 
-    // ---------- Data ----------
+    // ----------------- Data -----------------
     const THEMES = [
       "POWER DYNAMICS & GOVERNANCE",
       "ETHICS OF REPRESENTATION & WITNESSING",
@@ -58,7 +91,8 @@
         id: "M1",
         color: "#1A2B4C",
         title: "Module 1: Narrative as Social Power",
-        themes: ["POWER DYNAMICS & GOVERNANCE","MATERIALITY & INFRASTRUCTURE","AFFECT & EMOTION"],
+        themes: ["POWER DYNAMICS & GOVERNANCE", "MATERIALITY & INFRASTRUCTURE", "AFFECT & EMOTION"],
+        microStory: "A rumor becomes a rule. A slogan becomes a policy. Watch how a single phrase rearranges a room. Then a city.",
         subs: [
           { h: "1.1 The Narrative Construction of Reality",
             bullets: [
@@ -82,6 +116,7 @@
         color: "#228B22",
         title: "Module 2: Storytelling for Resistance and Transformation",
         themes: ["ETHICS OF REPRESENTATION & WITNESSING","AFFECT & EMOTION","FUTURES & IMAGINATION"],
+        microStory: "A witness testifies in fragments. The fragments refuse to line up neatly. The truth arrives anyway.",
         subs: [
           { h: "2.1 Testimonio and Bearing Witness",
             bullets: [
@@ -105,6 +140,7 @@
         color: "#FFA500",
         title: "Module 3: Digital Storytelling and Narrative Democracies",
         themes: ["POWER DYNAMICS & GOVERNANCE","ETHICS OF REPRESENTATION & WITNESSING","MATERIALITY & INFRASTRUCTURE","AFFECT & EMOTION"],
+        microStory: "The post was small. The ripples were not. A thousand tiny edits wrote a constitution overnight.",
         subs: [
           { h: "3.1 Platformed Testimonies and Digital Publics",
             bullets: [
@@ -128,6 +164,7 @@
         color: "#800080",
         title: "Module 4: From Writer to Narrative Architect",
         themes: ["MATERIALITY & INFRASTRUCTURE","FUTURES & IMAGINATION"],
+        microStory: "Blueprint first, then bricks. The world is staged, then lived. You are drafting the stage lights.",
         subs: [
           { h: "4.1 Transmedia Storytelling and World-building",
             bullets: [
@@ -151,6 +188,7 @@
         color: "#808080",
         title: "Module 5: Ethics and Politics of Storytelling",
         themes: ["POWER DYNAMICS & GOVERNANCE","ETHICS OF REPRESENTATION & WITNESSING","AFFECT & EMOTION"],
+        microStory: "Who gets to speak for whom is not a grammar question. It is a border question.",
         subs: [
           { h: "5.1 Voice, Silence, and Representation",
             bullets: [
@@ -174,6 +212,7 @@
         color: "#00CED1",
         title: "Module 6: Narrating with AI",
         themes: ["POWER DYNAMICS & GOVERNANCE","ETHICS OF REPRESENTATION & WITNESSING","MATERIALITY & INFRASTRUCTURE","FUTURES & IMAGINATION"],
+        microStory: "The model predicts you. You surprise it. That gap is where authorship begins.",
         subs: [
           { h: "6.1 AI as Co-creator and Narrative Generator",
             bullets: [
@@ -194,55 +233,153 @@
       },
     ];
 
-    // ---------- Three.js background ----------
-    function useThreeBackground() {
+    const CONNECTIONS = [
+      ["M1","M2"],["M1","M3"],["M2","M3"],["M3","M6"],["M4","M2"],["M6","M5"],["M5","M4"],["M5","M6"],["M1","M5"],["M2","M4"],["M3","M4"],["M4","M6"]
+    ];
+
+    // ----------------- Three.js background + clickable module graph + easter eggs -----------------
+    function useThreeBackground(themeState) {
+      const { activeTheme } = themeState;
       useEffect(() => {
         const canvas = document.getElementById("bg3d");
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
-        camera.position.set(0, 0, 10);
+        const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
+        camera.position.set(0, 0, 12);
 
-        const ambient = new THREE.AmbientLight(0xffffff, 0.15);
+        const ambient = new THREE.AmbientLight(0xffffff, 0.16);
         scene.add(ambient);
 
-        // Points
-        const COUNT = 550;
+        // Moving point cloud
+        const COUNT = 700;
         const positions = new Float32Array(COUNT * 3);
         const velocities = new Float32Array(COUNT * 3);
         for (let i = 0; i < COUNT; i++) {
-          positions[i*3+0] = (Math.random() - 0.5) * 16;
-          positions[i*3+1] = (Math.random() - 0.5) * 10;
-          positions[i*3+2] = (Math.random() - 0.5) * 16;
+          positions[i*3+0] = (Math.random() - 0.5) * 18;
+          positions[i*3+1] = (Math.random() - 0.5) * 12;
+          positions[i*3+2] = (Math.random() - 0.5) * 18;
           velocities[i*3+0] = (Math.random() - 0.5) * 0.01;
           velocities[i*3+1] = (Math.random() - 0.5) * 0.01;
           velocities[i*3+2] = (Math.random() - 0.5) * 0.01;
         }
-        const geom = new THREE.BufferGeometry();
-        geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-        const mat = new THREE.PointsMaterial({ size: 0.035, color: 0xffffff, transparent: true, opacity: 0.65 });
-        const points = new THREE.Points(geom, mat);
-        scene.add(points);
+        const cloudGeo = new THREE.BufferGeometry();
+        cloudGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+        const cloudMat = new THREE.PointsMaterial({ size: 0.035, color: 0xffffff, transparent: true, opacity: 0.6 });
+        const cloud = new THREE.Points(cloudGeo, cloudMat);
+        scene.add(cloud);
 
-        // Gentle linking lines
+        // Soft linking lines
         const lineGroup = new THREE.Group();
         scene.add(lineGroup);
-        const PAIRS = 80;
+        const PAIRS = 100;
         const endpoints = [];
         for (let i = 0; i < PAIRS; i++) {
-          const a = new THREE.Vector3((Math.random()-0.5)*12, (Math.random()-0.5)*8, (Math.random()-0.5)*12);
-          const b = new THREE.Vector3((Math.random()-0.5)*12, (Math.random()-0.5)*8, (Math.random()-0.5)*12);
+          const a = new THREE.Vector3((Math.random()-0.5)*14, (Math.random()-0.5)*10, (Math.random()-0.5)*14);
+          const b = new THREE.Vector3((Math.random()-0.5)*14, (Math.random()-0.5)*10, (Math.random()-0.5)*14);
           const vA = new THREE.Vector3((Math.random()-0.5)*0.008, (Math.random()-0.5)*0.008, (Math.random()-0.5)*0.008);
           const vB = new THREE.Vector3((Math.random()-0.5)*0.008, (Math.random()-0.5)*0.008, (Math.random()-0.5)*0.008);
           const geo = new THREE.BufferGeometry().setFromPoints([a, b]);
           const mat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.12 });
           const line = new THREE.Line(geo, mat);
           lineGroup.add(line);
-          endpoints.push({ a, b, vA, vB, geo });
+          endpoints.push({ a, b, vA, vB, geo, mat });
         }
 
+        // Clickable module graph nodes
+        const moduleGroup = new THREE.Group();
+        scene.add(moduleGroup);
+        const moduleMap = new Map();
+        const ringRadius = 6.2;
+        MODULES.forEach((m, idx) => {
+          const angle = (idx / MODULES.length) * Math.PI * 2;
+          const pos = new THREE.Vector3(Math.cos(angle) * ringRadius, Math.sin(angle) * ringRadius * 0.62, 0);
+          const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(0.18, 24, 24),
+            new THREE.MeshBasicMaterial({ color: new THREE.Color(m.color), transparent: true, opacity: 0.9 })
+          );
+          sphere.position.copy(pos);
+          sphere.userData = { id: m.id, title: m.title };
+          moduleGroup.add(sphere);
+          moduleMap.set(m.id, sphere);
+        });
+        // Edges between modules
+        const edgeGroup = new THREE.Group();
+        scene.add(edgeGroup);
+        const edgeLines = [];
+        CONNECTIONS.forEach(([a,b]) => {
+          const sA = moduleMap.get(a), sB = moduleMap.get(b);
+          const geo = new THREE.BufferGeometry().setFromPoints([sA.position, sB.position]);
+          const mat = new THREE.LineDashedMaterial({ color: 0xffffff, transparent: true, opacity: 0.25, dashSize: .2, gapSize: .1 });
+          const line = new THREE.Line(geo, mat);
+          line.computeLineDistances();
+          edgeGroup.add(line);
+          edgeLines.push(line);
+        });
+
+        // Easter eggs
+        const eggsGroup = new THREE.Group();
+        scene.add(eggsGroup);
+        const eggQuotes = [
+          "Find the gaps. Write inside them.",
+          "Every system tells a story. Audit its plot.",
+          "Friction is a freedom feature.",
+          "Witness before you persuade.",
+          "Architect futures with care."
+        ];
+        const eggs = [];
+        for (let i = 0; i < 5; i++) {
+          const egg = new THREE.Mesh(
+            new THREE.TetrahedronGeometry(0.15),
+            new THREE.MeshBasicMaterial({ color: 0xfff59d, transparent: true, opacity: 0.9 })
+          );
+          egg.position.set((Math.random()-0.5)*10, (Math.random()-0.5)*6, (Math.random()-0.5)*8);
+          egg.userData = { type: "egg", quote: eggQuotes[i] };
+          eggsGroup.add(egg);
+          eggs.push(egg);
+        }
+
+        // Raycaster for clicks
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const tooltip = document.getElementById("tooltip");
+        function onMouseMove(e) {
+          mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+          mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+          raycaster.setFromCamera(mouse, camera);
+          const intersects = raycaster.intersectObjects([...moduleGroup.children, ...eggsGroup.children], true);
+          if (intersects.length) {
+            const obj = intersects[0].object;
+            const label = obj.userData.type === "egg" ? "Click to collect" : obj.userData.title;
+            tooltip.textContent = label;
+            tooltip.style.left = `${e.clientX}px`;
+            tooltip.style.top = `${e.clientY}px`;
+            tooltip.style.display = "block";
+          } else {
+            tooltip.style.display = "none";
+          }
+        }
+        function onClick(e) {
+          raycaster.setFromCamera(mouse, camera);
+          const intersects = raycaster.intersectObjects([...moduleGroup.children, ...eggsGroup.children], true);
+          if (!intersects.length) return;
+          const obj = intersects[0].object;
+
+          if (obj.userData.type === "egg") {
+            window.dispatchEvent(new CustomEvent("egg-found", { detail: obj.userData.quote }));
+            obj.visible = false;
+            return;
+          }
+          // Module click
+          const id = obj.userData.id;
+          window.dispatchEvent(new CustomEvent("module-node-click", { detail: id }));
+        }
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("click", onClick);
+
+        // Resize
         function resize() {
           const w = window.innerWidth;
           const h = window.innerHeight;
@@ -253,39 +390,65 @@
         resize();
         window.addEventListener("resize", resize);
 
+        // Animate
         let t = 0;
+        const themeColors = {
+          "POWER DYNAMICS & GOVERNANCE": 0x60a5fa,
+          "ETHICS OF REPRESENTATION & WITNESSING": 0xf472b6,
+          "MATERIALITY & INFRASTRUCTURE": 0xa78bfa,
+          "AFFECT & EMOTION": 0x34d399,
+          "FUTURES & IMAGINATION": 0xf59e0b,
+        };
+
         const animate = () => {
-          // Animate points
-          const arr = geom.attributes.position.array;
+          // drift
+          const arr = cloudGeo.attributes.position.array;
           for (let i = 0; i < COUNT; i++) {
             const i3 = i*3;
             arr[i3+0] += velocities[i3+0];
             arr[i3+1] += velocities[i3+1];
             arr[i3+2] += velocities[i3+2];
-            // Soft bounds
-            for (let k = 0; k < 3; k++) {
-              if (arr[i3+k] > 10 || arr[i3+k] < -10) velocities[i3+k] *= -1;
-            }
+            if (arr[i3+0] > 10 || arr[i3+0] < -10) velocities[i3+0] *= -1;
+            if (arr[i3+1] > 7 || arr[i3+1] < -7) velocities[i3+1] *= -1;
+            if (arr[i3+2] > 10 || arr[i3+2] < -10) velocities[i3+2] *= -1;
           }
-          geom.attributes.position.needsUpdate = true;
+          cloudGeo.attributes.position.needsUpdate = true;
 
-          // Animate lines
           endpoints.forEach(e => {
-            e.a.add(e.vA);
-            e.b.add(e.vB);
-            // Soft bounds
-            ["x","y","z"].forEach(axis => {
-              if (e.a[axis] > 8 || e.a[axis] < -8) e.vA[axis] *= -1;
-              if (e.b[axis] > 8 || e.b[axis] < -8) e.vB[axis] *= -1;
+            e.a.add(e.vA); e.b.add(e.vB);
+            ["x","y","z"].forEach(ax => {
+              if (e.a[ax] > 8 || e.a[ax] < -8) e.vA[ax] *= -1;
+              if (e.b[ax] > 8 || e.b[ax] < -8) e.vB[ax] *= -1;
             });
             e.geo.setFromPoints([e.a, e.b]);
+            // Subtle theme tint on lines
+            if (activeTheme && themeColors[activeTheme]) {
+              e.mat.color.setHex(themeColors[activeTheme]);
+              e.mat.opacity = 0.18;
+            } else {
+              e.mat.color.setHex(0xffffff);
+              e.mat.opacity = 0.12;
+            }
           });
 
-          // Slow camera drift
+          // camera float, theme zoom
           t += 0.002;
-          camera.position.x = Math.sin(t) * 0.6 + 0.0;
+          const baseZ = activeTheme ? 10.5 : 12;
+          camera.position.x = Math.sin(t) * 0.6;
           camera.position.y = Math.cos(t * 0.7) * 0.4;
+          camera.position.z += ((baseZ - camera.position.z) * 0.02);
           camera.lookAt(0, 0, 0);
+
+          // point size tint by theme
+          if (activeTheme && themeColors[activeTheme]) {
+            cloudMat.color.setHex(themeColors[activeTheme]);
+            cloudMat.size = 0.045;
+            cloudMat.opacity = 0.7;
+          } else {
+            cloudMat.color.setHex(0xffffff);
+            cloudMat.size = 0.035;
+            cloudMat.opacity = 0.6;
+          }
 
           renderer.render(scene, camera);
           requestAnimationFrame(animate);
@@ -294,12 +457,29 @@
 
         return () => {
           window.removeEventListener("resize", resize);
+          window.removeEventListener("mousemove", onMouseMove);
+          window.removeEventListener("click", onClick);
           renderer.dispose();
         };
+      }, [activeTheme]);
+    }
+
+    // ----------------- Utilities -----------------
+    function useScrollReveal() {
+      useEffect(() => {
+        const obs = new IntersectionObserver((entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              e.target.classList.add("revealed");
+              obs.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.2 });
+        document.querySelectorAll(".chapter").forEach(el => obs.observe(el));
+        return () => obs.disconnect();
       }, []);
     }
 
-    // ---------- UI ----------
     function BackToTop() {
       const [show, setShow] = useState(false);
       useEffect(() => {
@@ -315,9 +495,49 @@
             show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5",
           ].join(" ")}
           title="Back to Top"
-        >
-          ▲
-        </button>
+        >▲</button>
+      );
+    }
+
+    // ----------------- UI Components -----------------
+    function ChapterScroller() {
+      useScrollReveal();
+      const chapters = ["Power", "Voice", "Matter", "Affect", "Futures"];
+      return (
+        <section className="relative py-16 md:py-24">
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 max-w-6xl mx-auto">
+            {chapters.map((c, i) => (
+              <div key={i} className="chapter rounded-2xl border border-white/10 bg-white/[.02] p-6 text-center">
+                <div className="text-3xl font-black tracking-tight">{c}</div>
+                <div className="text-sm text-gray-300 mt-2">Scroll to unlock</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    function Header() {
+      return (
+        <header className="pt-16 md:pt-24">
+          <h1 className="text-center uppercase tracking-tight text-gray-100"
+              style={{ textShadow: "0 0 30px rgba(255,255,255,0.4)" }}>
+            <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.95]">
+              Writing for a Change 2.0
+            </span>
+          </h1>
+          <div className="relative w-full max-w-5xl mx-auto mt-12 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative" style={{ paddingBottom: "56.25%" }}>
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/btkAvUiNvvc?autoplay=1&mute=1&controls=0&loop=1&playlist=btkAvUiNvvc"
+                title="Course trailer"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+        </header>
       );
     }
 
@@ -336,11 +556,31 @@
                     : "bg-blue-500 hover:bg-blue-600 text-white",
                 ].join(" ")}
                 onClick={() => setActiveTheme(prev => (prev === t ? null : t))}
+                title="Toggle theme lens"
               >
                 {t}
               </span>
             ))}
           </div>
+        </div>
+      );
+    }
+
+    function MicroStory({ text }) {
+      const [open, setOpen] = useState(false);
+      return (
+        <div className="mt-3">
+          <button
+            className="text-sm px-3 py-2 rounded-md bg-white/10 hover:bg-white/20"
+            onClick={() => setOpen(o => !o)}
+          >
+            {open ? "Hide" : "Relevance"}
+          </button>
+          {open && (
+            <div className="mt-2 text-sm text-gray-200 bg-white/[.04] border border-white/10 rounded-lg p-3">
+              {text}
+            </div>
+          )}
         </div>
       );
     }
@@ -368,13 +608,15 @@
       );
     }
 
-    function ModuleCard({ m, activeTheme, index }) {
+    function ModuleCard({ m, activeTheme, recommended }) {
       const isFiltered = activeTheme && !m.themes.includes(activeTheme);
       return (
         <div
+          id={`card-${m.id}`}
           className={[
             "rounded-2xl border backdrop-blur-sm p-6 mb-8 shadow-2xl transition will-change-transform",
             isFiltered ? "opacity-30 grayscale pointer-events-none scale-[0.98]" : "",
+            recommended ? "pulse-outline" : "",
           ].join(" ")}
           style={{ backgroundColor: "#1a1a2e", borderColor: "rgba(255,255,255,0.08)" }}
         >
@@ -388,6 +630,7 @@
             </svg>
             <h3 className="text-xl md:text-2xl font-extrabold text-gray-100">{m.title}</h3>
           </div>
+          <div className="mt-1"><MicroStory text={m.microStory} /></div>
           <div className="mt-3">
             {m.subs.map((s, i) => <Submodule key={i} h={s.h} bullets={s.bullets} />)}
           </div>
@@ -395,55 +638,309 @@
       );
     }
 
-    function Header() {
+    // Narrative path selector quiz
+    function PathSelector({ onResult }) {
+      const [step, setStep] = useState(0);
+      const [answers, setAnswers] = useState({});
+      const Q = [
+        { key: "goal", q: "Your primary goal", opts: [
+          ["activism","Public interest and advocacy"],
+          ["craft","Creative craft and voice"],
+          ["policy","Policy, law, and governance"],
+          ["tech","Narratives with AI and media tech"],
+        ]},
+        { key: "mode", q: "Preferred mode", opts: [
+          ["witness","Bearing witness and testimony"],
+          ["design","Design and architecture of narratives"],
+          ["platforms","Digital publics and platforms"],
+        ]},
+        { key: "tone", q: "Your tone", opts: [
+          ["care","Care and ethics"],
+          ["power","Power analysis"],
+          ["future","Futures and imagination"],
+        ]},
+      ];
+      function choose(k,v) {
+        setAnswers(a => ({...a,[k]:v}));
+        setStep(s => Math.min(s+1, Q.length));
+      }
+      function recommend() {
+        // tiny heuristic
+        const picks = new Set();
+        if (answers.goal === "activism") picks.add("M2").add("M5");
+        if (answers.goal === "craft") picks.add("M1").add("M4");
+        if (answers.goal === "policy") picks.add("M1").add("M3").add("M5");
+        if (answers.goal === "tech") picks.add("M3").add("M4").add("M6");
+        if (answers.mode === "witness") picks.add("M2");
+        if (answers.mode === "design") picks.add("M4");
+        if (answers.mode === "platforms") picks.add("M3");
+        if (answers.tone === "care") picks.add("M5");
+        if (answers.tone === "power") picks.add("M1");
+        if (answers.tone === "future") picks.add("M4").add("M6");
+        const out = Array.from(picks);
+        onResult(out);
+      }
+      useEffect(() => { if (step === Q.length) recommend(); }, [step]);
+
       return (
-        <header className="pt-16 md:pt-24">
-          <h1
-            className="text-center uppercase tracking-tight text-gray-100"
-            style={{ textShadow: "0 0 30px rgba(255,255,255,0.4)" }}
-          >
-            <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.95]">
-              Writing for a Change 2.0
-            </span>
-          </h1>
-          <div
-            className="relative w-full max-w-5xl mx-auto mt-12 rounded-2xl overflow-hidden shadow-2xl"
-          >
-            <div className="relative" style={{ paddingBottom: "56.25%" }}>
-              <iframe
-                className="absolute inset-0 w-full h-full"
-                src="https://www.youtube.com/embed/btkAvUiNvvc?autoplay=1&mute=1&controls=0&loop=1&playlist=btkAvUiNvvc"
-                title="Course trailer"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[.03] p-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold">Choose your narrative path</h3>
+            <span className="text-xs text-gray-300">Step {Math.min(step+1, Q.length)}/{Q.length}</span>
           </div>
-        </header>
+          {step < Q.length ? (
+            <div className="mt-4">
+              <div className="text-sm text-gray-200 mb-3">{Q[step].q}</div>
+              <div className="flex flex-wrap gap-2">
+                {Q[step].opts.map(([val,label]) => (
+                  <button key={val}
+                    className="px-3 py-2 text-sm rounded-md bg-blue-500 hover:bg-blue-600"
+                    onClick={() => choose(Q[step].key, val)}
+                  >{label}</button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 text-sm text-gray-300">Great. Scroll to see your recommended modules highlighted.</div>
+          )}
+        </div>
       );
     }
 
+    // Live writing prompt + gallery
+    function LivePrompt() {
+      const [prompt, setPrompt] = useState("");
+      const [text, setText] = useState("");
+      const [gallery, setGallery] = useState(() => JSON.parse(localStorage.getItem("wfac_gallery") || "[]"));
+      useEffect(() => {
+        const prompts = [
+          "Write a 100 word counter-narrative to a trending headline.",
+          "Describe a system in one scene. Show its hidden rule.",
+          "Rewrite a policy as a parable. Keep it under 120 words.",
+          "Witness, do not explain. 80 words.",
+        ];
+        setPrompt(prompts[Math.floor(Math.random()*prompts.length)]);
+      }, []);
+      function submit() {
+        if (!text.trim()) return;
+        const item = { id: Date.now(), text: text.trim() };
+        const next = [item, ...gallery].slice(0, 12);
+        setGallery(next);
+        localStorage.setItem("wfac_gallery", JSON.stringify(next));
+        setText("");
+      }
+      return (
+        <section className="my-16">
+          <h3 className="text-xl font-bold mb-3">Try a live prompt</h3>
+          <div className="text-sm text-gray-300 mb-2">{prompt}</div>
+          <textarea
+            value={text}
+            onChange={e => setText(e.target.value)}
+            rows={5}
+            className="w-full rounded-lg bg-white/[.04] border border-white/10 p-3 outline-none"
+            placeholder="Write here..."
+          />
+          <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
+            <span>{text.length} chars</span>
+            <div className="space-x-2">
+              <button className="px-3 py-1 rounded bg-white/10 hover:bg-white/20" onClick={() => setText("")}>Clear</button>
+              <button className="px-3 py-1 rounded bg-blue-500 hover:bg-blue-600" onClick={submit}>Add to gallery</button>
+            </div>
+          </div>
+          {gallery.length > 0 && (
+            <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {gallery.map(item => (
+                <div key={item.id} className="rounded-lg border border-white/10 bg-white/[.03] p-3 text-sm">
+                  {item.text}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      );
+    }
+
+    // Narrative testimonials with typewriter
+    function Typewriter({ texts = [], speed = 35, pause = 1200 }) {
+      const [i, setI] = useState(0);
+      const [t, setT] = useState("");
+      useEffect(() => {
+        let mounted = true;
+        let idx = 0;
+        function typeNext() {
+          const full = texts[i % texts.length];
+          if (!mounted) return;
+          if (idx <= full.length) {
+            setT(full.slice(0, idx));
+            idx++;
+            setTimeout(typeNext, speed);
+          } else {
+            setTimeout(() => {
+              idx = 0;
+              setI(v => v + 1);
+            }, pause);
+          }
+        }
+        typeNext();
+        return () => { mounted = false; };
+      }, [i, texts, speed, pause]);
+      return <div className="text-lg md:text-xl text-gray-100"><span>{t}</span><span className="type-caret">&nbsp;</span></div>;
+    }
+
+    function Testimonials() {
+      const stories = [
+        "I entered to fix my prose. I left seeing power in paragraphs.",
+        "I used to write alone. Now I architect publics.",
+        "The module on witnessing changed my research ethics, then my fieldwork.",
+        "I learned to design friction as care. The audience stayed longer.",
+      ];
+      return (
+        <section className="my-16 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[.04] to-white/[.02] p-6 md:p-10">
+          <h3 className="text-xl font-bold mb-4">Story snapshots</h3>
+          <Typewriter texts={stories} />
+        </section>
+      );
+    }
+
+    // Toolkit unlock modal
+    function ToolkitUnlock() {
+      const [found, setFound] = useState(() => parseInt(localStorage.getItem("wfac_eggs") || "0", 10));
+      const [quotes, setQuotes] = useState([]);
+      const [open, setOpen] = useState(false);
+      useEffect(() => {
+        function onEgg(e) {
+          setFound(n => {
+            const next = Math.min(n + 1, 5);
+            localStorage.setItem("wfac_eggs", String(next));
+            return next;
+          });
+          setQuotes(q => [...q, e.detail]);
+          setOpen(true);
+        }
+        window.addEventListener("egg-found", onEgg);
+        return () => window.removeEventListener("egg-found", onEgg);
+      }, []);
+      function downloadToolkit() {
+        const content =
+`Narrative Builder’s Toolkit
+==========================
+
+Prompts
+1) Write a counter-narrative to a policy in 120 words.
+2) Find a hidden rule in a system and dramatize it in one scene.
+
+Heuristics
+• Show the system, not just the story.
+• Design friction as care.
+• Witness before you persuade.
+
+Collected quotes:
+${quotes.map((q,i)=>` ${i+1}. ${q}`).join("\n")}
+`;
+        const blob = new Blob([content], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "Narrative_Builders_Toolkit.txt";
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+      }
+      return (
+        <>
+          <div className="text-sm text-gray-300 mb-2">Easter eggs found: <span className="font-bold">{found}</span>/5</div>
+          {open && (
+            <div className="fixed inset-0 z-[1001] flex items-center justify-center bg-black/60">
+              <div className="max-w-md w-full rounded-xl border border-white/10 bg-[#111827] p-6">
+                <h4 className="text-lg font-bold mb-2">You discovered an insight</h4>
+                <ul className="text-sm text-gray-300 list-disc pl-5 space-y-1 mb-3">
+                  {quotes.slice(-3).map((q,i)=><li key={i}>{q}</li>)}
+                </ul>
+                <div className="flex items-center justify-between">
+                  <button className="px-3 py-2 rounded bg-white/10 hover:bg-white/20" onClick={()=>setOpen(false)}>Close</button>
+                  {found >= 5 && (
+                    <button className="px-3 py-2 rounded bg-blue-500 hover:bg-blue-600" onClick={downloadToolkit}>
+                      Download toolkit
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      );
+    }
+
+    // Host component
     function App() {
       const [activeTheme, setActiveTheme] = useState(null);
-      useThreeBackground();
+      const [recommended, setRecommended] = useState([]);
+      useThreeBackground({ activeTheme });
+
+      useEffect(() => {
+        function onNodeClick(e) {
+          const id = e.detail;
+          const el = document.getElementById(`card-${id}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            el.classList.add("pulse-outline");
+            setTimeout(()=>el.classList.remove("pulse-outline"), 2200);
+          }
+        }
+        window.addEventListener("module-node-click", onNodeClick);
+        return () => window.removeEventListener("module-node-click", onNodeClick);
+      }, []);
+
+      useEffect(() => {
+        // When recommendation changes, auto scroll to the first one
+        if (recommended.length) {
+          const first = document.getElementById(`card-${recommended[0]}`);
+          if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, [recommended]);
 
       return (
         <div className="relative min-h-screen max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
           <Header />
+
+          {/* 1. Chapter scroller intro */}
+          <ChapterScroller />
+
+          {/* 2. Theme lenses */}
           <ThemeTags activeTheme={activeTheme} setActiveTheme={setActiveTheme} />
+
+          {/* 3. Narrative path selector */}
+          <section className="my-10">
+            <PathSelector onResult={setRecommended} />
+          </section>
+
+          {/* 4. Modules list with micro-stories and theme filtering */}
           <section className="mt-4 mb-24">
-            {MODULES.map((m, i) => (
-              <ModuleCard key={m.id} m={m} index={i} activeTheme={activeTheme} />
+            {MODULES.map((m) => (
+              <ModuleCard
+                key={m.id}
+                m={m}
+                activeTheme={activeTheme}
+                recommended={recommended.includes(m.id)}
+              />
             ))}
           </section>
+
+          {/* 5. Live prompt and gallery */}
+          <LivePrompt />
+
+          {/* 7. Social proof with typewriter */}
+          <Testimonials />
+
+          {/* 8. Gamified exploration status and unlock */}
+          <ToolkitUnlock />
+
           <BackToTop />
         </div>
       );
     }
 
+    // Mount
     const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(<App />);
   </script>
 </body>
 </html>
-
